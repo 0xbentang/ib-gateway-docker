@@ -10,7 +10,6 @@ FROM ubuntu:22.04 as setup
 
 ENV IB_GATEWAY_VERSION=10.12.2v
 ENV IB_GATEWAY_RELEASE_CHANNEL=stable
-ENV IBC_VERSION=3.14.0
 
 # Prepare system
 RUN apt-get update -y
@@ -33,22 +32,15 @@ RUN chmod a+x ./ibgateway-${IB_GATEWAY_VERSION}-standalone-linux-x64.sh
 RUN ./ibgateway-${IB_GATEWAY_VERSION}-standalone-linux-x64.sh -q -dir /root/Jts/ibgateway/${IB_GATEWAY_VERSION}
 COPY ./config/ibgateway/jts.ini /root/Jts/jts.ini
 
-# Install IBC
-RUN curl -sSL https://github.com/IbcAlpha/IBC/releases/download/${IBC_VERSION}/IBCLinux-${IBC_VERSION}.zip --output IBCLinux-${IBC_VERSION}.zip
-RUN mkdir /root/ibc
-RUN unzip ./IBCLinux-${IBC_VERSION}.zip -d /root/ibc
-RUN chmod -R u+x /root/ibc/*.sh 
-RUN chmod -R u+x /root/ibc/scripts/*.sh
-COPY ./config/ibc/config.ini.tmpl /root/ibc/config.ini.tmpl
-
 # Copy scripts
 COPY ./scripts /root/scripts
+COPY ./config/libfm/libfm.conf /root/libfm.conf
 
 #
 # Build Stage: build production image
 #
 
-FROM ubuntu:22.04
+FROM fredblgr/ubuntu-novnc:20.04
 
 ENV IB_GATEWAY_VERSION=10.12.2v
 
@@ -64,20 +56,18 @@ RUN apt-get install --no-install-recommends --yes \
   libxtst6 \
   libxi6 \
   libgtk2.0-bin \
-  socat \
-  x11vnc
+  socat
 
 # Copy files
 COPY --from=setup /root/ .
 RUN chmod a+x /root/scripts/*.sh
 COPY --from=setup /usr/local/i4j_jres/ /usr/local/i4j_jres
 
-# IBC env vars
-ENV TWS_MAJOR_VRSN ${IB_GATEWAY_VERSION}
-ENV TWS_PATH /root/Jts
-ENV IBC_PATH /root/ibc
-ENV IBC_INI /root/ibc/config.ini
-ENV TWOFA_TIMEOUT_ACTION exit
+# Start
+VOLUME [ "/root/Jts/settings" ]
 
-# Start run script
-CMD ["/root/scripts/run.sh"]
+RUN mkdir -p /root/Desktop
+RUN cp /root/Jts/ibgateway/${IB_GATEWAY_VERSION}/*.desktop /root/Desktop/
+RUN mkdir -p /root/.config/libfm
+RUN cp /root/libfm.conf /root/.config/libfm/libfm.conf
+RUN cp /root/scripts/run.sh /etc/startup/run.sh
