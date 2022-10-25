@@ -8,8 +8,8 @@
 
 FROM ubuntu:22.04 as setup
 
-ENV IB_GATEWAY_VERSION=10.12.2v
-ENV IB_GATEWAY_RELEASE_CHANNEL=stable
+ENV IB_GATEWAY_VERSION=10.19.1d
+ENV IB_GATEWAY_RELEASE_CHANNEL=latest
 
 # Prepare system
 RUN apt-get update -y
@@ -42,7 +42,7 @@ COPY ./config/libfm/libfm.conf /root/libfm.conf
 
 FROM fredblgr/ubuntu-novnc:20.04
 
-ENV IB_GATEWAY_VERSION=10.12.2v
+ENV IB_GATEWAY_VERSION=10.19.1d
 
 WORKDIR /root
 
