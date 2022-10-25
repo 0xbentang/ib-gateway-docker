@@ -3,9 +3,9 @@
 sleep 30
 
 if [ "$TRADING_MODE" = "paper" ]; then
-  printf "Forking :::4000 onto 0.0.0.0:4002\n"
-  socat TCP-LISTEN:4002,fork TCP:127.0.0.1:4000
+  printf "Forking :::4002 onto 0.0.0.0:4000\n"
+  socat TCP-LISTEN:4000,fork TCP:127.0.0.1:4002
 else
-  printf "Forking :::4000 onto 0.0.0.0:4001\n"
-  socat TCP-LISTEN:4001,fork TCP:127.0.0.1:4000
+  printf "Forking :::4001 onto 0.0.0.0:4000\n"
+  socat TCP-LISTEN:4000,fork TCP:127.0.0.1:4001
 fi
